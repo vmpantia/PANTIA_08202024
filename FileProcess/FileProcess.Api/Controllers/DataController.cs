@@ -4,7 +4,6 @@ using FileProcess.Api.Extensions;
 using FileProcess.Api.Models.Dtos;
 using FileProcess.Api.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 using System.Text.Json;
 
 namespace FileProcess.Api.Controllers
@@ -25,8 +24,8 @@ namespace FileProcess.Api.Controllers
             _fileRepository = fileRepository;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> FileProcessAsync([FromForm] UploadFileDto request)
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportData([FromForm] UploadFileDto request)
         {
             // Check if the file is a valid json file
             if (!request.File.IsValidJsonFile())

@@ -8,7 +8,7 @@ namespace FileProcess.Api.Repositories
     {
         public EmployeeRepository(FileProcessDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Employee>> GetEmployees() =>
+        public async Task<IEnumerable<Employee>> GetEmployeesAsync() =>
             await GetAll().ToListAsync();
     }
 }

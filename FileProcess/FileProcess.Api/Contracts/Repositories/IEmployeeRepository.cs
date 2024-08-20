@@ -4,6 +4,6 @@ namespace FileProcess.Api.Contracts.Repositories
 {
     public interface IEmployeeRepository
     {
-        Task<IEnumerable<Employee>> GetEmployees();
+        Task<IEnumerable<Employee>> GetEmployeesAsync();
     }
 }

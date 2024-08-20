@@ -7,7 +7,7 @@ namespace FileProcess.Api.Repositories
     {
         public FileRepository(FileProcessDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Models.Entities.File>> GetFiles() =>
+        public async Task<IEnumerable<Models.Entities.File>> GetFilesAsync() =>
             await GetAll().ToListAsync();
     }
 }
