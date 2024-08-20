@@ -1,0 +1,15 @@
+services:
+  fileprocess.api:
+    image: ${DOCKER_REGISTRY-}fileprocessapi
+    build:
+      context: .
+      dockerfile: FileProcess.Api/Dockerfile
+
+  fileprocess.database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: fileprocess.database
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=P@ssw0rd
+    ports:
+      - 1443:1443
