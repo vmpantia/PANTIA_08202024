@@ -1,5 +1,5 @@
 ﻿using FileProcess.Api.Constants;
-using FileProcess.Api.Contracts;
+using FileProcess.Api.Contracts.Services;
 using System.Net;
 
 namespace FileProcess.Api.Middlewares

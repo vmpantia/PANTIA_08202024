@@ -1,4 +1,4 @@
-﻿namespace FileProcess.Api.Contracts
+﻿namespace FileProcess.Api.Contracts.Services
 {
     public interface IAuthenticationService
     {

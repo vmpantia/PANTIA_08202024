@@ -1,10 +1,13 @@
-using FileProcess.Api.Contracts;
+using FileProcess.Api.Contracts.Services;
 using FileProcess.Api.Middlewares;
+using FileProcess.Api.Repositories;
 using FileProcess.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<FileProcessDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("MigrationDb")));
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddControllers();

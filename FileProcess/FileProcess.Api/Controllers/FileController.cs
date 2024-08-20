@@ -1,4 +1,4 @@
-﻿using FileProcess.Api.Models;
+﻿using FileProcess.Api.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileProcess.Api.Controllers
@@ -10,7 +10,7 @@ namespace FileProcess.Api.Controllers
         public FileController() { }
 
         [HttpPost]
-        public IActionResult FileProcess([FromForm] UploadFilesDto request)
+        public IActionResult FileProcess([FromForm] UploadFileDto request)
         {
             return Ok();
         }
