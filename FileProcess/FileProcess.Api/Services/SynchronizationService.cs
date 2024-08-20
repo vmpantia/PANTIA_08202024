@@ -7,56 +7,71 @@ using FileProcess.Api.Models.Sync;
 
 namespace FileProcess.Api.Services
 {
-    public class SynchronizationService<TEntity, TKey> : ISynchronizationService<TEntity, TKey> 
+    public class SynchronizationService<TEntity, TKey> : ISynchronizationService<TEntity, TKey>
         where TEntity : class, IKey<TKey>, IAuditProperty
-        where TKey : IKey<TKey>
     {
         private readonly IUnitOfWork<TEntity> _uow;
         private readonly IMapper _mapper;
-        public SynchronizationService(IUnitOfWork<TEntity> uow, IMapper mapper)
+        private readonly ILoggerService<SynchronizationService<TEntity, TKey>> _logger;
+        public SynchronizationService(IUnitOfWork<TEntity> uow, 
+                                      IMapper mapper, 
+                                      ILoggerService<SynchronizationService<TEntity, TKey>> logger)
         {
             _uow = uow;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task DoSyncAsync(IEnumerable<TEntity> entities, CancellationToken token)
+        public async Task DoSyncAsync(IEnumerable<TEntity> entities, CancellationToken token = default)
         {
-            // Skip if the parameter entities is empty
-            if (!entities.Any()) return;
-
-            // Get current and new entities
-            var currentEntities = _uow.Repository.GetAll().ToList();
-            var newEntities = entities.ToList();
-            var toBeSync = GetDataToBeSync(currentEntities, newEntities);
-
-            foreach (var sync in toBeSync)
+            try
             {
-                switch (sync.Action)
-                {
-                    case SyncAction.Create:
-                        {
-                            var toBeCreate = newEntities.First(data => data.Id!.Equals(sync.Id));
-                            await _uow.Repository.CreateAsync(toBeCreate, token, false);
-                            break;
-                        }
-                    case SyncAction.Update:
-                        {
-                            var currentEntity = currentEntities.First(data => data.Id!.Equals(sync.Id));
-                            var newEntity = newEntities.First(data => data.Id!.Equals(sync.Id));
-                            var toBeUpdate = _mapper.Map(newEntity, currentEntity);
-                            await _uow.Repository.UpdateAsync(toBeUpdate, token, false);
-                            break;
-                        }
-                    case SyncAction.Delete:
-                        {
-                            var toBeDelete = currentEntities.First(data => data.Id!.Equals(sync.Id));
-                            await _uow.Repository.DeleteAsync(toBeDelete, token, false);
-                            break;
-                        }
-                }
-            }
+                // Get current and new entities
+                var currentEntities = _uow.Repository.GetAll().ToList();
+                var newEntities = entities.ToList();
+                var toBeSync = GetDataToBeSync(currentEntities, newEntities);
 
-            await _uow.SaveAsync(token);
+                _logger.LogInfo($"Summaries for the data to be sync in the database. " +
+                    $"Create [{toBeSync.Count(data => data.Action == SyncAction.Create)}] " +
+                    $"Update [{toBeSync.Count(data => data.Action == SyncAction.Update)}] " +
+                    $"Delete [{toBeSync.Count(data => data.Action == SyncAction.Delete)}]");
+
+                foreach (var sync in toBeSync)
+                {
+                    switch (sync.Action)
+                    {
+                        case SyncAction.Create:
+                            {
+                                var toBeCreate = newEntities.First(data => data.Id!.Equals(sync.Id));
+                                toBeCreate.CreatedAt = DateTime.Now; // Update audit property
+                                await _uow.Repository.CreateAsync(toBeCreate, token, false);
+                                break;
+                            }
+                        case SyncAction.Update:
+                            {
+                                var currentEntity = currentEntities.First(data => data.Id!.Equals(sync.Id));
+                                var newEntity = newEntities.First(data => data.Id!.Equals(sync.Id));
+                                var toBeUpdate = _mapper.Map(newEntity, currentEntity);
+                                toBeUpdate.UpdatedAt = DateTime.Now; // Update audit property
+                                await _uow.Repository.UpdateAsync(toBeUpdate, token, false);
+                                break;
+                            }
+                        case SyncAction.Delete:
+                            {
+                                var toBeDelete = currentEntities.First(data => data.Id!.Equals(sync.Id));
+                                await _uow.Repository.DeleteAsync(toBeDelete, token, false);
+                                break;
+                            }
+                    }
+                }
+
+                await _uow.SaveAsync(token);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
         }
 
         private List<DataSync<TKey>> GetDataToBeSync(List<TEntity> currentEntities, List<TEntity> newEntities)

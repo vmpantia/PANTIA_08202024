@@ -20,19 +20,19 @@ namespace FileProcess.Api.Repositories
         public IQueryable<TEntity> GetByExpression(Expression<Func<TEntity, bool>> expression) =>
             _table.Where(expression);
 
-        public async Task CreateAsync(TEntity entity, CancellationToken token, bool autoSave = true)
+        public async Task CreateAsync(TEntity entity, CancellationToken token = default, bool autoSave = true)
         {
             await _table.AddAsync(entity, token);
             if (autoSave) await _context.SaveChangesAsync(token);
         }
 
-        public async Task UpdateAsync(TEntity entity, CancellationToken token, bool autoSave = true)
+        public async Task UpdateAsync(TEntity entity, CancellationToken token = default, bool autoSave = true)
         {
             _table.Update(entity);
             if (autoSave) await _context.SaveChangesAsync(token);
         }
 
-        public async Task DeleteAsync(TEntity entity, CancellationToken token, bool autoSave = true)
+        public async Task DeleteAsync(TEntity entity, CancellationToken token = default, bool autoSave = true)
         {
             _table.Remove(entity);
             if (autoSave) await _context.SaveChangesAsync(token);

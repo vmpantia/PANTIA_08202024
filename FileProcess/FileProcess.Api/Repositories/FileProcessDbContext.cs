@@ -8,5 +8,6 @@ namespace FileProcess.Api.Repositories
         public FileProcessDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Models.Entities.File> Files { get; set; }
     }
 }
